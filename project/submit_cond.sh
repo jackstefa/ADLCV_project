@@ -1,0 +1,62 @@
+#!/bin/sh 
+### General options 
+### -- specify queue -- gpua40, gpul40s, gpuv100, gpua100
+#BSUB -q gpuv100
+### -- set the job Name -- 
+#BSUB -J 256_cond
+### -- ask for number of cores (default: 1) -- 
+#BSUB -n 4 
+### -- specify that the cores must be on the same host -- 
+#BSUB -R "span[hosts=1]"
+### -- specify that we need 4GB of memory per core/slot -- 
+#BSUB -R "rusage[mem=4GB]"
+### -- specify that we want the job to get killed if it exceeds 5 GB per core/slot -- 
+#BSUB -M 5GB
+### -- set walltime limit: hh:mm -- 
+#BSUB -W 24:00 
+### -- set the email address -- 
+# please uncomment the following line and put in your e-mail address,
+# if you want to receive e-mail notifications on a non-default address
+##BSUB -u your_email_address
+### -- send notification at start -- 
+#BSUB -B 
+### -- send notification at completion -- 
+#BSUB -N 
+### -- Specify the output and error file. %J is the job-id -- 
+### -- -o and -e mean append, -oo and -eo mean overwrite -- 
+#BSUB -o Output_%J.out 
+#BSUB -e Output_%J.err 
+
+# here follow the commands you want to execute with input.in as the input file
+module load python3/3.12.9
+cd /zhome/43/8/213582/ACV
+source .venv/bin/activate
+
+N_SIZE=256
+BATCH_SIZE=256 #For N_SIZE=256, we use a batch size of 256. For N_SIZE>=512, we use a batch size of 512.
+
+# cd /zhome/43/8/213582/ACV/project/Training
+# python run_Unet_conditioned.py -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -t -1
+
+cd /zhome/43/8/213582/ACV/project/Generation
+python generate_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -B $BATCH_SIZE -LR 0.0001 -O Adam -W 32 -Ns 1000 --device cuda:0 -c 1
+python generate_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -B $BATCH_SIZE -LR 0.0001 -O Adam -W 32 -Ns 1000 --device cuda:0 -c 2
+python generate_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -B $BATCH_SIZE -LR 0.0001 -O Adam -W 32 -Ns 1000 --device cuda:0 -c 3
+python generate_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -B $BATCH_SIZE -LR 0.0001 -O Adam -W 32 -Ns 1000 --device cuda:0 -c 4
+python generate_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -B $BATCH_SIZE -LR 0.0001 -O Adam -W 32 -Ns 1000 --device cuda:0 -c 5
+python generate_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -B $BATCH_SIZE -LR 0.0001 -O Adam -W 32 -Ns 1000 --device cuda:0 -c 6
+
+cd /zhome/43/8/213582/ACV/project/Evaluation
+python compute_fmem_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -Ns 10 --gap_threshold 0.333 --device cuda:0 -c 1 
+python compute_fmem_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -Ns 10 --gap_threshold 0.333 --device cuda:0 -c 2
+python compute_fmem_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -Ns 10 --gap_threshold 0.333 --device cuda:0 -c 3
+python compute_fmem_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -Ns 10 --gap_threshold 0.333 --device cuda:0 -c 4
+python compute_fmem_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -Ns 10 --gap_threshold 0.333 --device cuda:0 -c 5
+python compute_fmem_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -Ns 10 --gap_threshold 0.333 --device cuda:0 -c 6
+
+python compute_FID_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -istat 1 --N1 0 --N2 10 --device cpu -c 1
+python compute_FID_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -istat 1 --N1 0 --N2 10 --device cpu -c 2
+python compute_FID_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -istat 1 --N1 0 --N2 10 --device cpu -c 3
+python compute_FID_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -istat 1 --N1 0 --N2 10 --device cpu -c 4
+python compute_FID_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -istat 1 --N1 0 --N2 10 --device cpu -c 5
+python compute_FID_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -istat 1 --N1 0 --N2 10 --device cpu -c 6
