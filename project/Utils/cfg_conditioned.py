@@ -1,8 +1,8 @@
-import Diffusion
+import Diffusion_conditioned as Diffusion
 import calc
 import numpy as np
 import torch
-import loader
+import loader_conditioned as loader
 
 def load_config(DATASET):
     config = Diffusion.TrainingConfig()
@@ -30,7 +30,8 @@ def load_config(DATASET):
         config.path_save = '../../Saves/'          
         config.IMG_SHAPE = (3, 32, 32)             # Updated to 3 channels for RGB
         config.BATCH_SIZE = 512
-        config.path_data = '../data/train_images/'      
+        config.path_data = '../data/ISIC/'
+        config.path_metadata = '../data/metadata_combined.csv'     
         config.CENTER = True
         config.STANDARDIZE = False
         config.n_images = 1024                     # Default (overwritten by -n flag)
@@ -41,8 +42,9 @@ def load_config(DATASET):
         config.LR = 1e-4                           # Default (overwritten by -LR flag)
         config.mode = 'normal'
         config.time_step = -1
-        config.DEVICE = 'cuda:0'                   # Make sure this matches your GPU setup
+        config.DEVICE = 'mps'                   # Make sure this matches your GPU setup
         config.TIMESTEPS = 1000
+
         
     else:
         raise Exception('Dataset {:s} not implemented'.format(DATASET))
@@ -65,12 +67,7 @@ def load_training_data(config, index, loadtest=False):
         # Use our custom ISIC loader
         trainset, testset = loader.load_ISIC(config, loadtest=loadtest, index=index)
         
-        # Convert to tensor so compute_fmem and compute_FID can process it natively
-        print("Converting ISIC dataset to tensor for evaluation...")
-        train_images = torch.zeros(size=(len(trainset), config.IMG_SHAPE[0], config.IMG_SHAPE[1], config.IMG_SHAPE[2]))
-        for i in range(len(trainset)):
-            train_images[i] = trainset[i]
-        return train_images, testset
+        return trainset, testset
     else:
         # Original CelebA logic
         size = config.IMG_SHAPE[1]

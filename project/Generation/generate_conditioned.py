@@ -6,8 +6,8 @@ import sys
 from tqdm import tqdm
 
 sys.path.insert(1, '../Utils/')      # In case we run from Experiments/Generation
-import Diffusion
-import Unet
+import Diffusion_conditioned as Diffusion
+import Unet_conditioned as Unet
 import cfg
 import argparse
 import loader
@@ -30,6 +30,7 @@ parser.add_argument('-Ns', '--Nsamples', type=int,
                     help='Number of samples to generate (should be multiple of 100).')
 parser.add_argument('--device', type=str,
                     help='Device used to load and apply the model.', default='cuda:0')
+parser.add_argument('-c', type=int, default=0, help='Conditioning class (integer from 0 to 6).')
 
 args = parser.parse_args()
 print(args)
@@ -44,7 +45,7 @@ config.OPTIM = args.optim
 config.BATCH_SIZE = int(args.batch_size)
 config.LR = float(args.learning_rate)
 index = int(args.index)
-
+conditioning_class = int(args.c)
 if not Nsamples % 100 == 0:
     raise TypeError('Nsamples should be a multiple of 100.')
 
@@ -94,19 +95,24 @@ for (j, checkpoint_id) in enumerate(training_times):
     
     # Loop for generation at the current checkpoint
     for i in range(0, Ns):
-        path_save = config.path_save + type_model + '/Samples/' + '{:d}/'.format(checkpoint_id)
+        path_save = config.path_save + type_model + '/Samples/' + str(conditioning_class) + '/' +'{:d}/'.format(checkpoint_id)
         doesExist = os.path.exists(path_save)
         if not doesExist:
             os.makedirs(path_save)
         
         print('Sample {:d}/{:d}'.format(i, Ns))
+
+        # 1. Create a tensor of the requested class for the whole batch
+        c_tensor = torch.full((batch_gen,), conditioning_class, dtype=torch.long, device=config.DEVICE)
+
         samples_gen, samples_init = Diffusion.sample_diffusion_from_noise_DDIM(model_diffusion,
                                             n_images=batch_gen,
                                             config=config,
                                             df=df,
                                             dim=4,
                                             eta=0.0,            # Deterministic trajectories
-                                            ddim_steps=100)     # Number of steps reduced (much faster)
+                                            ddim_steps=100,
+                                            c=c_tensor)     # Number of steps reduced (much faster)
         # Save initial samples
         path = path_save + str(config.TIMESTEPS)
         # Create dir if does not exist

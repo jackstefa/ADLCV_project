@@ -45,6 +45,7 @@ def parse_arguments():
     parser.add_argument("--N2", help="Ending batch index", type=int, default=100)
     parser.add_argument("--batch_size_samples", help="Size of each sample batch", type=int, default=100)
     parser.add_argument("--device", help="Device to use (cuda:0, cpu)", type=str, default='cuda:0')
+    parser.add_argument("-c", "--skin_type", help="Fitzpatrick skin type generated (1-6) or 0 for unconditional", type=int, default=0)
     
     return parser.parse_args()
 
@@ -60,16 +61,17 @@ def detransform_images(images, config):
 
 
 def compute_fid_for_checkpoint(tau, type_model, config, path_stats_testset, 
-                             N1, N2, batch_size_samples, file_FID):
+                             N1, N2, batch_size_samples, file_FID, skin_type):
     """Compute FID for a specific training checkpoint."""
-    # Save directory for temporary images
-    file_img_gen = config.path_save + type_model + 'FID/{:d}/'.format(tau)
+
+    # NEW: Update the temporary extraction folder to prevent class overlaps
+    file_img_gen = config.path_save + type_model + f'FID_Class{skin_type}/{tau}/'
     os.makedirs(file_img_gen, exist_ok=True)
     
     try:
         # Load generated images for the current training time
         for i in range(N1, N2):
-            path_save = config.path_save + type_model + 'Samples/' + '{:d}/'.format(tau)
+            path_save = config.path_save + type_model + 'Samples/' + str(skin_type) + '/' + '{:d}/'.format(tau)
             path = path_save + 'generated'
             file_a = path + '/samples_a_{:d}'.format(i)
             
@@ -115,7 +117,7 @@ def compute_fid_all_checkpoints(training_times, type_model, config, args):
     # Setup paths and files
     path_stats_testset = config.path_save + 'FID_ref/stats{:d}.npz'.format(args.id_stat)
     path_file = config.path_save + type_model + 'FID/'
-    file_FID = path_file + 'FID_{:d}.txt'.format(args.id_stat)
+    file_FID = path_file + 'FID_{:d}_Class_{:d}.txt'.format(args.id_stat, args.skin_type)
     if os.path.exists(file_FID):     # Remove existing file
         os.remove(file_FID)
     os.makedirs(path_file, exist_ok=True)
@@ -135,7 +137,8 @@ def compute_fid_all_checkpoints(training_times, type_model, config, args):
             N1=args.N1,
             N2=args.N2,
             batch_size_samples=args.batch_size_samples,
-            file_FID=file_FID
+            file_FID=file_FID,
+            skin_type=args.skin_type
         )
         pbar.set_description(f'FID = {fid:.3f}')
 

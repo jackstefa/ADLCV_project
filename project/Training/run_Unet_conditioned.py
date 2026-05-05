@@ -9,10 +9,10 @@ import argparse
 import glob
 
 sys.path.insert(1, '../Utils/')     # In case we run from Experiments/Training
-import Unet
+import Unet_conditioned as Unet
 import Plot
-import Diffusion
-import loader
+import Diffusion_conditioned as Diffusion
+import loader_conditioned as loader
 import cfg
 from numpy.random import default_rng
 
@@ -45,8 +45,9 @@ else:
 # Overwrite config with command line arguments
 DATASET = 'ISIC' # Changed to ISIC
 config = cfg.load_config(DATASET)
-config.DATASET = 'ISIC'
-config.path_data = '../data/train_images/' # Path to the preprocessed ISIC images
+config.DATASET = 'ISIC_Conditioned' # Update dataset name to reflect conditioning
+config.path_data = '../data/ISIC/' # Path to the preprocessed ISIC images
+config.path_metadata = '../data/metadata_combined.csv' # <--- NEW: Add this line! Point it to your CSV.
 config.IMG_SHAPE = (3, size, size) # Changed 1 to 3 for RGB channels
 config.n_images = n
 config.BATCH_SIZE = min(512, n)
@@ -92,27 +93,28 @@ trainset, testset = loader.load_ISIC(config, loadtest=False, index=index)
 # Convert the trainset subset into a full tensor (matching the expected format)
 print("Loading images to tensor...")
 train_images = torch.zeros(size=(config.n_images, config.IMG_SHAPE[0], config.IMG_SHAPE[1], config.IMG_SHAPE[2]))
+
+train_labels = torch.zeros(size=(config.n_images,), dtype=torch.long)
 for i in range(len(trainset)):
-    train_images[i] = trainset[i]
+    img, label = trainset[i] # Unpack the tuple from our new loader
+    train_images[i] = img
+    train_labels[i] = label
 train_images = train_images.to(config.DEVICE)
+train_labels = train_labels.to(config.DEVICE)
 print("Images loaded!")
 
-# In[]
-
 if __name__ == '__main__':
-    trainloader = torch.utils.data.DataLoader(train_images, 
+    # Wrap both tensors in a TensorDataset
+    train_dataset = torch.utils.data.TensorDataset(train_images, train_labels)
+    trainloader = torch.utils.data.DataLoader(train_dataset, 
                                               batch_size=config.BATCH_SIZE,
                                               shuffle=True)
-    if testset is not None:
-        testloader = torch.utils.data.DataLoader(testset, 
-                                                  batch_size=config.BATCH_SIZE,
-                                                  shuffle=False)
 
 # del trainset
 # In[] Plot one random batch of training images
 
 dataiter = iter(trainloader)
-images = next(dataiter)
+images, labels = next(dataiter)
 
 Plot.imshow(images[0:32].cpu(), config.mean, config.std)
 plt.savefig(path_images + 'Training_set.pdf', 
@@ -128,6 +130,7 @@ if __name__ == '__main__':
         base_channels_multiples = (1, 2, 4),
         apply_attention         = (False, True, True),
         dropout_rate            = 0.1,
+        num_classes               = 7
     )
     
     # Resume training from last weights in the folder

@@ -15,8 +15,8 @@ import warnings
 
 # Add Utils to path
 sys.path.insert(1, '../Utils/')      # In case we run from Experiments/Evaluation
-import Diffusion as dm
-import cfg
+import Diffusion_conditioned as dm
+import cfg_conditioned as cfg
 
 warnings.filterwarnings("ignore")
 
@@ -76,11 +76,12 @@ def parse_arguments():
     parser.add_argument("--batch_sample_size", help="Size of each sample batch", type=int, default=100)
     parser.add_argument("--gap_threshold", help="Gap ratio threshold for collapsed samples", type=float, default=1/3)
     parser.add_argument("--device", help="Device to use (cuda:0, cpu)", type=str, default='cuda:0')
+    parser.add_argument("-c", "--skin_type", help="Fitzpatrick skin type generated (1-6) or 0 for unconditional", type=int, default=0)
     
     return parser.parse_args()
 
 def compute_fraction_mem(training_times, train_images, type_model, config, file_fc,
-                             nsamples, sample_size, gap_threshold):
+                             nsamples, sample_size, gap_threshold, skin_type):
     """Compute fraction collapsed for all training times."""
     N = np.prod(config.IMG_SHAPE)
     X = train_images.reshape(-1, N).float()
@@ -93,7 +94,7 @@ def compute_fraction_mem(training_times, train_images, type_model, config, file_
         knn_tensor_all = torch.zeros(nsamples * sample_size, k)
         
         for i in range(nsamples):
-            path_save = config.path_save + type_model + 'Samples/' + '/{:d}/'.format(tau)
+            path_save = config.path_save + type_model + 'Samples/' + str(skin_type) + '/' + '{:d}/'.format(tau)
             path = path_save + 'generated'
             file_a = path + '/samples_a_{:d}'.format(i)
             
@@ -160,7 +161,7 @@ def main():
     
     # Create output directory and file
     path_file = config.path_save + type_model + 'Memorization/'
-    file_fc = path_file + 'fraction_memorized.txt'
+    file_fc = path_file + f'fraction_memorized_Class_{args.skin_type}.txt'
     if os.path.exists(file_fc):     # Remove existing file
         os.remove(file_fc)
     os.makedirs(path_file, exist_ok=True)
@@ -171,9 +172,26 @@ def main():
     print(f"Computing memorization fraction for {len(training_times)} checkpoints...")
     print(f"Model: {type_model}")
     print(f"Output file: {file_fc}")
+
+    # Unpack both images and labels!
+    train_data, _ = cfg.load_training_data(config, args.index)
     
+    all_images = []
+    all_labels = []
+    for i in range(len(train_data)):
+        img, label = train_data[i]
+        all_images.append(img)
+        all_labels.append(label)
+
+    train_images = torch.stack(all_images)
+    train_labels = torch.tensor(all_labels)
+
+    # Filter to ONLY include the real images of the targeted skin type
+    if args.skin_type != 0:
+        class_mask = train_labels == args.skin_type
+        train_images = train_images[class_mask]
+
     # Load training data
-    train_images, _ = cfg.load_training_data(config, args.index)
     train_images = train_images[:config.n_images, :, :, :].to(config.DEVICE)
     
     # Setup diffusion configuration
@@ -192,7 +210,8 @@ def main():
         file_fc=file_fc,
         nsamples=args.Nsamples,
         sample_size=args.batch_sample_size,
-        gap_threshold=args.gap_threshold
+        gap_threshold=args.gap_threshold,
+        skin_type=args.skin_type
     )
     
     print("Memorization fraction computation completed!")
