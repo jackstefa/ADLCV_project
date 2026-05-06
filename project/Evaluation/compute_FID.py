@@ -74,7 +74,7 @@ def compute_fid_for_checkpoint(tau, type_model, config, path_stats_testset,
             file_a = path + '/samples_a_{:d}'.format(i)
             
             # Load generated samples
-            images_a = torch.load(file_a)
+            images_a = torch.load(file_a, map_location='cpu')
             
             # Detransform data to original scale
             t = detransform_images(images_a, config)
@@ -164,16 +164,17 @@ def main():
     # Define training times to analyze
     training_times = cfg.get_training_times()
     
-    # Load training data (for consistency, though not used in FID computation)
+    ### USELESS CODE
+    # # Load training data (for consistency, though not used in FID computation)
     train_images, _ = cfg.load_training_data(config, args.index)
-    train_images = train_images[:config.n_images, :, :, :].to(config.DEVICE)
+    # train_images = train_images[:config.n_images, :, :, :].to('cpu')
     
-    # Setup diffusion configuration
-    df = dm.DiffusionConfig(
-        n_steps=config.TIMESTEPS,
-        img_shape=config.IMG_SHAPE,
-        device=config.DEVICE,
-    )
+    # # Setup diffusion configuration
+    # df = dm.DiffusionConfig(
+    #     n_steps=config.TIMESTEPS,
+    #     img_shape=config.IMG_SHAPE,
+    #     device=config.DEVICE,
+    # )
     
     # Compute FID for all checkpoints
     compute_fid_all_checkpoints(

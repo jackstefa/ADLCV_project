@@ -1,3 +1,8 @@
 .DS_Store
 .venv
+__pycache__/
 _others
+
+Saves/*
+!Saves/FID_ref
+!Saves/final_models
