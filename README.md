@@ -1,4 +1,18 @@
 ## Setup environment
+
+on the hpc, locate the project folder, then:
+```bash
+module load python3/3.12.9
+```
+create the virtual env
+```bash
+python3 -m venv .venv
+```
+activate it:
+```bash
+source .venv/bin/activate
+```
+
 ```bash
 pip install -r requirements.txt
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
