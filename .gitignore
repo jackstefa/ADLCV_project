@@ -3,6 +3,7 @@
 __pycache__/
 _others
 Output*
+submit_*.sh
 
 Saves/*
 !Saves/FID_ref
