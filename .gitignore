@@ -2,6 +2,7 @@
 .venv
 __pycache__/
 _others
+Output*
 
 Saves/*
 !Saves/FID_ref
