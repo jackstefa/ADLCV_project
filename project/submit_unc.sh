@@ -43,4 +43,4 @@ python generate.py -D ISIC -n $N_SIZE -i 0 -s 32 -B $BATCH_SIZE -LR 0.0001 -O Ad
 
 cd /zhome/43/8/213582/ACV/project/Evaluation
 python compute_fmem.py -D ISIC -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -Ns 10 --gap_threshold 0.333 --device cuda:0
-python compute_FID.py -D ISIC -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -istat 1 --N1 0 --N2 10 --device cpu
+python compute_FID.py -D ISIC -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -istat 1 --N1 0 --N2 10 --device cuda:0

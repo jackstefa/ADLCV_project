@@ -35,8 +35,8 @@ source .venv/bin/activate
 N_SIZE=256
 BATCH_SIZE=256 #For N_SIZE=256, we use a batch size of 256. For N_SIZE>=512, we use a batch size of 512.
 
-# cd /zhome/43/8/213582/ACV/project/Training
-# python run_Unet_conditioned.py -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -t -1
+cd /zhome/43/8/213582/ACV/project/Training
+python run_Unet_conditioned.py -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -t -1
 
 cd /zhome/43/8/213582/ACV/project/Generation
 python generate_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -B $BATCH_SIZE -LR 0.0001 -O Adam -W 32 -Ns 1000 --device cuda:0 -c 1
@@ -54,9 +54,9 @@ python compute_fmem_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR
 python compute_fmem_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -Ns 10 --gap_threshold 0.333 --device cuda:0 -c 5
 python compute_fmem_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -Ns 10 --gap_threshold 0.333 --device cuda:0 -c 6
 
-python compute_FID_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -istat 1 --N1 0 --N2 10 --device cpu -c 1
-python compute_FID_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -istat 1 --N1 0 --N2 10 --device cpu -c 2
-python compute_FID_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -istat 1 --N1 0 --N2 10 --device cpu -c 3
-python compute_FID_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -istat 1 --N1 0 --N2 10 --device cpu -c 4
-python compute_FID_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -istat 1 --N1 0 --N2 10 --device cpu -c 5
-python compute_FID_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -istat 1 --N1 0 --N2 10 --device cpu -c 6
+python compute_FID_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -istat 1 --N1 0 --N2 10 --device cuda:0 -c 1
+python compute_FID_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -istat 1 --N1 0 --N2 10 --device cuda:0 -c 2
+python compute_FID_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -istat 1 --N1 0 --N2 10 --device cuda:0 -c 3
+python compute_FID_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -istat 1 --N1 0 --N2 10 --device cuda:0 -c 4
+python compute_FID_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -istat 1 --N1 0 --N2 10 --device cuda:0 -c 5
+python compute_FID_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -istat 1 --N1 0 --N2 10 --device cuda:0 -c 6
