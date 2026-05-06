@@ -82,6 +82,6 @@ python compute_FID_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 
 
 * Plot results (updated the dataset sizes to plot inside the script)
 ```bash
-python plot_timescales_conditioned.py -classes 1 2 3 4 5 6
+python plot_timescales_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -classes 1 2 3 4 5 6
 ```
 > -classes is the number of classes to plot

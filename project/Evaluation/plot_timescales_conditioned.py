@@ -50,7 +50,7 @@ def main():
         color = colors[idx % len(colors)]
         
         # File paths using the updated folder names
-        fid_file = os.path.join(base_save_path, model_name, f'FID', f'FID_2_Class_{c}.txt')
+        fid_file = os.path.join(base_save_path, model_name, f'FID', f'FID_1_Class_{c}.txt')
         fmem_file = os.path.join(base_save_path, model_name, f'Memorization', f'fraction_memorized_Class_{c}.txt')
         
         # --- 1. Plot FID ---
