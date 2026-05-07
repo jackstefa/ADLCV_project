@@ -11,7 +11,7 @@ n_base = 32
 optim = 'Adam'
 lr = 0.0001
 index = 0
-base_save_path = '../../Saves/'
+base_save_path = '../../Saves/final_models'  # Update this path if your saves are located elsewhere
 
 # Colors for different n sizes
 colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd']
@@ -82,6 +82,8 @@ plt.title('Generalization vs Memorization Timescales on ISIC', fontsize=16)
 plt.tight_layout()
 
 # Save the plot
-output_filename = 'Phase_Diagram_ISIC.png'
-plt.savefig(output_filename, dpi=300, bbox_inches='tight')
-print(f"\nPlot successfully saved as: {output_filename}")
+output_dir = '../../Saves/final_models/Plots'
+os.makedirs(output_dir, exist_ok=True)
+output_filename = 'Phase_Diagram_Unconditioned.png'
+plt.savefig(os.path.join(output_dir, output_filename), dpi=300, bbox_inches='tight')
+print(f"\nPlot successfully saved as: {os.path.join(output_dir, output_filename)}")

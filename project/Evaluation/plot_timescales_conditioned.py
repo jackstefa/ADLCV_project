@@ -22,7 +22,7 @@ def main():
     # Reconstruct the exact folder name matching your training and evaluation scripts
     batch_size = min(args.batch_size, args.num)
     model_name = f"{args.dataset}{args.img_size}_{args.num}_{args.nbase}_{args.optim}_{batch_size}_{args.learning_rate:.4f}_index{args.index}"
-    base_save_path = '../../Saves/'
+    base_save_path = '../../Saves/final_models'
     
     # Distinct colors for clarity (Blue, Red, Green, Orange, Purple, Yellow)
     colors = ['#1f77b4', '#d62728', '#2ca02c', '#ff7f0e', '#9467bd', '#8c564b']
@@ -86,9 +86,11 @@ def main():
     plt.tight_layout()
 
     # Save to disk
+    output_dir = '../../Saves/final_models/Plots'
+    os.makedirs(output_dir, exist_ok=True)
     output_filename = f'Phase_Diagram_Conditioned_n{args.num}.png'
-    plt.savefig(output_filename, dpi=300, bbox_inches='tight')
-    print(f"\nPlot successfully saved as: {output_filename}")
+    plt.savefig(os.path.join(output_dir, output_filename), dpi=300, bbox_inches='tight')
+    print(f"\nPlot successfully saved as: {os.path.join(output_dir, output_filename)}")
 
 if __name__ == '__main__':
     main()
