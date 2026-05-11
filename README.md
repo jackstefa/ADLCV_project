@@ -26,6 +26,8 @@ pip install torchaudio #if previously didn't work
 
 > $BATCH_SIZE = 256 for N_SIZE =256, 512 otherwise
 
+> $BALANCED = 0, 1
+
 
 ### Unconditioned
 * Train model (the loader is set to pick up a random set of images)
@@ -66,20 +68,20 @@ python plot_timescales.py
 ### Conditioned (balanced)
 * Train model (the loader is set to pick up a random set of images, with classes balanced)
 ```bash
-python run_Unet_conditioned.py -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -t -1
+python run_Unet_conditioned.py -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -t -1 -bal $BALANCED
 ```
 
 * Generate samples
 
 ```bash
-python generate_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -B $BATCH_SIZE -LR 0.0001 -O Adam -W 32 -Ns 1000 --device cuda:0 -c 1
+python generate_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -B $BATCH_SIZE -LR 0.0001 -O Adam -W 32 -Ns 1000 --device cuda:0 -c 1 -bal $BALANCED
 ```
 > -Ns is the number of samples (default 100, 1000 is for more accuracy but it also takes more space)
 > -c is the number of the Fitzpatrick class I-VI (1 to 6), 0 means no conditioning
 
 * Evaluate FID
 ```bash
-python compute_fmem_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -Ns 10 --gap_threshold 0.333 --device cuda:0 -c 1 
+python compute_fmem_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -Ns 10 --gap_threshold 0.333 --device cuda:0 -c 1 -bal $BALANCED
 
 ```
 > -N2 to be set to 1 if we evaluate 100 previously generated samples, set to 10 if we evaluate 1000 samples
@@ -88,7 +90,7 @@ python compute_fmem_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR
 
 * Evaluate Memorization
 ```bash
-python compute_FID_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -istat 1 --N1 0 --N2 10 --device cuda:0 -c 1
+python compute_FID_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -istat 1 --N1 0 --N2 10 --device cuda:0 -c 1 -bal $BALANCED
 ```
 > -Ns to be set to 1 if we evaluate 100 previously generated samples, set to 10 if we evaluate 1000 samples
 > -c is the number of the Fitzpatrick class I-VI (1 to 6) to evaluate
@@ -96,6 +98,6 @@ python compute_FID_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 
 
 * Plot results (updated the dataset sizes to plot inside the script)
 ```bash
-python plot_timescales_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -classes 1 2 3 4 5 6
+python plot_timescales_conditioned.py -D ISIC_Conditioned -n $N_SIZE -i 0 -s 32 -LR 0.0001 -O Adam -W 32 -B $BATCH_SIZE -classes 1 2 3 4 5 6 -bal $BALANCED
 ```
 > -classes is the number of classes to plot

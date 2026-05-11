@@ -39,6 +39,7 @@ def parse_arguments():
     parser.add_argument("-B", "--batch_size", help="Batch size used to train the model", type=int, required=True)
     parser.add_argument("-D", "--dataset", help="Dataset used to train the model", type=str, required=True)
     parser.add_argument("-istat", "--id_stat", help="Index of the reference statistics (1 to 5)", type=int, required=True)
+    parser.add_argument("-bal", "--balanced", help="Use balanced sampling (1) or random/unbalanced (0)", type=int, default=1)
     
     # Analysis parameters
     parser.add_argument("--N1", help="Starting batch index", type=int, default=0)
@@ -157,11 +158,12 @@ def main():
     config.OPTIM = args.optim
     config.LR = args.learning_rate
     config.DEVICE = args.device
+    config.BALANCED = bool(args.balanced) # Store the balanced sampling flag in the config
     
     # Model type string for paths
-    type_model = '{:s}{:d}_{:d}_{:d}_{:s}_{:d}_{:.4f}_index{:d}/'.format(
+    type_model = '{:s}{:d}_{:d}_{:d}_{:s}_{:d}_{:.4f}_index{:d}_bal{:d}/'.format(
         config.DATASET, args.img_size, config.n_images, args.nbase, 
-        config.OPTIM, config.BATCH_SIZE, config.LR, args.index
+        config.OPTIM, config.BATCH_SIZE, config.LR, args.index, int(config.BALANCED)
     )
     
     # Define training times to analyze

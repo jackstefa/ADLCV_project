@@ -31,6 +31,7 @@ parser.add_argument('-Ns', '--Nsamples', type=int,
 parser.add_argument('--device', type=str,
                     help='Device used to load and apply the model.', default='cuda:0')
 parser.add_argument('-c', type=int, default=0, help='Conditioning class (integer from 0 to 6).')
+parser.add_argument("-bal", "--balanced", help="Use balanced sampling (1) or random/unbalanced (0)", type=int, default=1)
 
 args = parser.parse_args()
 print(args)
@@ -39,6 +40,7 @@ config = cfg.load_config(DATASET)   # Load base config for this dataset
 n_base = int(args.nbase)
 config.DEVICE = args.device
 config.n_images = int(args.num)
+config.BALANCED = bool(args.balanced)
 Nsamples = int(args.Nsamples)
 size = int(args.img_size)
 config.OPTIM = args.optim
@@ -57,9 +59,9 @@ df = Diffusion.DiffusionConfig(
 )
 
 # Load model on the device
-type_model = '{:s}{:d}_{:d}_{:d}_{:s}_{:d}_{:.4f}_index{:d}/'.format(config.DATASET, size,
+type_model = '{:s}{:d}_{:d}_{:d}_{:s}_{:d}_{:.4f}_index{:d}_bal{:d}/'.format(config.DATASET, size,
                                      config.n_images, n_base, config.OPTIM, config.BATCH_SIZE,
-                                     config.LR, index)
+                                     config.LR, index, int(config.BALANCED))
 
 model_diffusion = Unet.UNet(
     input_channels          = config.IMG_SHAPE[0],

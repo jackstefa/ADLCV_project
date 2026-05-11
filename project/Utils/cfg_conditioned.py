@@ -44,6 +44,7 @@ def load_config(DATASET):
         config.time_step = -1
         config.DEVICE = 'mps'                   # Make sure this matches your GPU setup
         config.TIMESTEPS = 1000
+        config.BALANCED = True                     # Default to balanced sampling (overwritten by -bal flag)
 
         
     else:

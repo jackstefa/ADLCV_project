@@ -88,54 +88,69 @@ def load_ISIC(config, loadtest=False, ntest=2048, index=0):
     ])
     
     isic_dataset = ISICDataset(config.path_data, metadata_path, transform)
-    
-    # ==========================================
-    # NEW: BALANCED SAMPLING LOGIC
-    # ==========================================
-    print("Balancing dataset across Fitzpatrick classes...")
     rng = np.random.default_rng(seed=42) # Fixed seed for reproducibility
     
-    # 1. Quickly extract all labels without loading the heavy image files
-    all_labels = []
-    for i in range(len(isic_dataset)):
-        img_name = isic_dataset.image_names[i]
-        isic_id = os.path.splitext(img_name)[0]
+    # ==========================================
+    # BALANCED SAMPLING LOGIC
+    # ==========================================
+    # Check the flag (defaulting to True if it wasn't set)
+    if getattr(config, 'BALANCED', True):
+        print("Balancing dataset across Fitzpatrick classes...")
+        # 1. Quickly extract all labels without loading the heavy image files
+        all_labels = []
+        for i in range(len(isic_dataset)):
+            img_name = isic_dataset.image_names[i]
+            isic_id = os.path.splitext(img_name)[0]
+            
+            label = 0 # Default null class
+            if isic_id in isic_dataset.metadata.index:
+                fitz_val = isic_dataset.metadata.loc[isic_id, 'fitzpatrick_skin_type']
+                if isinstance(fitz_val, pd.Series): 
+                    fitz_val = fitz_val.iloc[0]
+                if isinstance(fitz_val, str) and fitz_val in isic_dataset.fitz_map:
+                    label = isic_dataset.fitz_map[fitz_val]
+            all_labels.append(label)
+            
+        all_labels = np.array(all_labels)
         
-        label = 0 # Default null class
-        if isic_id in isic_dataset.metadata.index:
-            fitz_val = isic_dataset.metadata.loc[isic_id, 'fitzpatrick_skin_type']
-            if isinstance(fitz_val, pd.Series): 
-                fitz_val = fitz_val.iloc[0]
-            if isinstance(fitz_val, str) and fitz_val in isic_dataset.fitz_map:
-                label = isic_dataset.fitz_map[fitz_val]
-        all_labels.append(label)
+        # 2. Separate indices by valid skin type (classes 1 through 6)
+        # We ignore class 0 here so the model explicitly learns the 6 skin tones.
+        class_indices = {c: np.where(all_labels == c)[0] for c in range(1, 7)}
         
-    all_labels = np.array(all_labels)
-    
-    # 2. Separate indices by valid skin type (classes 1 through 6)
-    # We ignore class 0 here so the model explicitly learns the 6 skin tones.
-    class_indices = {c: np.where(all_labels == c)[0] for c in range(1, 7)}
-    
-    # 3. Calculate how many images to draw per class
-    n_classes = 6
-    n_per_class = config.n_images // n_classes
-    remainder = config.n_images % n_classes # Handle sizes that don't divide perfectly by 6
-    
-    subset_indices = []
-    for c in range(1, 7):
-        # Add 1 extra image to the first few classes if there's a remainder
-        draw_count = n_per_class + (1 if c <= remainder else 0)
+        # 3. Calculate how many images to draw per class
+        n_classes = 6
+        n_per_class = config.n_images // n_classes
+        remainder = config.n_images % n_classes # Handle sizes that don't divide perfectly by 6
         
-        available_indices = class_indices[c]
-        if len(available_indices) < draw_count:
-            raise ValueError(f"Not enough images for class {c}. Needed {draw_count}, found {len(available_indices)}.")
+        subset_indices = []
+        for c in range(1, 7):
+            # Add 1 extra image to the first few classes if there's a remainder
+            draw_count = n_per_class + (1 if c <= remainder else 0)
+            
+            available_indices = class_indices[c]
+            if len(available_indices) < draw_count:
+                raise ValueError(f"Not enough images for class {c}. Needed {draw_count}, found {len(available_indices)}.")
+            
+            # Sample without replacement
+            sampled = rng.choice(available_indices, size=draw_count, replace=False)
+            subset_indices.extend(sampled)
+            
+        # 4. Shuffle the final combined indices so the batches are mixed
+        rng.shuffle(subset_indices)
+
+    else:
+        # ==========================================
+        # UNBALANCED (RANDOM) SAMPLING LOGIC
+        # ==========================================
+        print("Randomly sampling dataset (unbalanced)...")
+        all_indices = np.arange(len(isic_dataset))
+        rng.shuffle(all_indices)
         
-        # Sample without replacement
-        sampled = rng.choice(available_indices, size=draw_count, replace=False)
-        subset_indices.extend(sampled)
+        start_idx = index * config.n_images
+        end_idx = min((index + 1) * config.n_images, len(isic_dataset))
         
-    # 4. Shuffle the final combined indices so the batches are mixed
-    rng.shuffle(subset_indices)
+        # Select the shuffled indices
+        subset_indices = all_indices[start_idx:end_idx].tolist()
     
     # Create the training subset
     trainset = torch.utils.data.Subset(isic_dataset, subset_indices)
@@ -171,7 +186,7 @@ def load_ISIC(config, loadtest=False, ntest=2048, index=0):
     config.std = std
 
     # ==========================================
-    # NEW: Print Class Distribution
+    # Print Class Distribution
     # ==========================================
     print("\nAnalyzing class distribution in the loaded subset...")
     label_counts = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}

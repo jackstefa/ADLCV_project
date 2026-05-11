@@ -14,6 +14,7 @@ def parse_args():
     parser.add_argument("-i", "--index", type=int, default=0, help="Dataset split index")
     parser.add_argument("-D", "--dataset", type=str, default="ISIC_Conditioned", help="Dataset tag")
     parser.add_argument("-classes", nargs="+", type=int, required=True, help="List of skin type classes to plot (e.g. 2 5)")
+    parser.add_argument("-bal", "--balanced", help="Use balanced sampling (1) or random/unbalanced (0)", type=int, default=1)
     return parser.parse_args()
 
 def main():
@@ -21,7 +22,7 @@ def main():
     
     # Reconstruct the exact folder name matching your training and evaluation scripts
     batch_size = min(args.batch_size, args.num)
-    model_name = f"{args.dataset}{args.img_size}_{args.num}_{args.nbase}_{args.optim}_{batch_size}_{args.learning_rate:.4f}_index{args.index}"
+    model_name = f"{args.dataset}{args.img_size}_{args.num}_{args.nbase}_{args.optim}_{batch_size}_{args.learning_rate:.4f}_index{args.index}_bal{int(args.balanced)}"
     base_save_path = '../../Saves/final_models'
     
     # Distinct colors for clarity (Blue, Red, Green, Orange, Purple, Yellow)
@@ -88,7 +89,7 @@ def main():
     # Save to disk
     output_dir = '../../Saves/final_models/Plots'
     os.makedirs(output_dir, exist_ok=True)
-    output_filename = f'Phase_Diagram_Conditioned_n{args.num}.png'
+    output_filename = f'Phase_Diagram_Conditioned_n{args.num}_bal{int(args.balanced)}.png'
     plt.savefig(os.path.join(output_dir, output_filename), dpi=300, bbox_inches='tight')
     print(f"\nPlot successfully saved as: {os.path.join(output_dir, output_filename)}")
 

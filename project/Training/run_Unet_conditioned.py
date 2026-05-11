@@ -26,6 +26,7 @@ parser.add_argument("-LR", "--learning_rate", help="Learning rate for optimizati
 parser.add_argument("-O", "--optim", help="Optimisation type (SGD_Momentum or Adam)", type=str)
 parser.add_argument("-W", "--nbase", help="Number of base filters", type=str)
 parser.add_argument("-t", "--time", help="Diffusion timestep", type=int)
+parser.add_argument("-bal", "--balanced", help="Use balanced sampling (1) or random/unbalanced (0)", type=int, default=1)
 args = vars(parser.parse_args())
 print(args)
 
@@ -37,6 +38,7 @@ lr = args['learning_rate']
 optim = args['optim']
 n_base = int(args['nbase'])
 time_step = args['time']
+balanced = args['balanced']
 if time_step == -1:
     mode = 'normal'
 else:
@@ -55,15 +57,16 @@ config.OPTIM = optim
 config.LR = lr
 config.mode = mode
 config.time_step = time_step
+config.BALANCED = bool(balanced) # Store the flag in the config object
 
 if config.mode == 'normal':
-    suffix = '{:s}{:d}_{:d}_{:d}_{:s}_{:d}_{:.4f}_index{:d}/'.format(config.DATASET, size,
+    suffix = '{:s}{:d}_{:d}_{:d}_{:s}_{:d}_{:.4f}_index{:d}_bal{:d}/'.format(config.DATASET, size,
                                         config.n_images, n_base, config.OPTIM, config.BATCH_SIZE,
-                                        config.LR, index)
+                                        config.LR, index, int(config.BALANCED))
 elif config.mode == 'fixed_time':
-    suffix = '{:s}{:d}_{:d}_{:d}_{:s}_{:d}_{:.4f}_index{:d}_t{:d}/'.format(config.DATASET, size,
+    suffix = '{:s}{:d}_{:d}_{:d}_{:s}_{:d}_{:.4f}_index{:d}_t{:d}_bal{:d}/'.format(config.DATASET, size,
                                         config.n_images, n_base, config.OPTIM, config.BATCH_SIZE,
-                                        config.LR, index, time_step)
+                                        config.LR, index, time_step, int(config.BALANCED))
     print('Training at fixed diffusion time: {:d}'.format(config.time_step))
 
 # Create path to images and model save
