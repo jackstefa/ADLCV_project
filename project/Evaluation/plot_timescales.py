@@ -78,12 +78,12 @@ lines_2, labels_2 = ax2.get_legend_handles_labels()
 ax1.legend(lines_1 + lines_2, labels_1 + labels_2, loc='upper center', 
            bbox_to_anchor=(0.5, -0.15), ncol=3, fontsize=12)
 
-plt.title('Generalization vs Memorization Timescales on ISIC', fontsize=16)
+plt.title('Generalization vs Memorization Timescales on ISIC, Unconditioned, Unbalanced, Adam', fontsize=16)
 plt.tight_layout()
 
 # Save the plot
 output_dir = '../../Saves/final_models/Plots'
 os.makedirs(output_dir, exist_ok=True)
-output_filename = 'Phase_Diagram_Unconditioned.png'
+output_filename = 'Phase_Diagram_Unconditioned_Unbalanced_Adam.png'
 plt.savefig(os.path.join(output_dir, output_filename), dpi=300, bbox_inches='tight')
 print(f"\nPlot successfully saved as: {os.path.join(output_dir, output_filename)}")

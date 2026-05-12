@@ -83,13 +83,19 @@ def main():
     ax1.legend(lines_1 + lines_2, labels_1 + labels_2, loc='upper center', 
                bbox_to_anchor=(0.5, -0.15), ncol=2, fontsize=12)
 
-    plt.title(f'Generalization vs Memorization per Skin Type (n={args.num})', fontsize=16)
+    if args.balanced:
+        str_bal = "Balanced Sampling"
+    else:
+        str_bal = "Random/Unbalanced Sampling"
+
+    plt.title(f'Generalization vs Memorization per Skin Type (n={args.num}, {str_bal})', fontsize=16)
     plt.tight_layout()
 
     # Save to disk
     output_dir = '../../Saves/final_models/Plots'
     os.makedirs(output_dir, exist_ok=True)
-    output_filename = f'Phase_Diagram_Conditioned_n{args.num}_bal{int(args.balanced)}.png'
+    classes_str = "".join([str(c) for c in args.classes])
+    output_filename = f'Phase_Diagram_Conditioned_n{args.num}_bal{int(args.balanced)}_c{classes_str}.png'
     plt.savefig(os.path.join(output_dir, output_filename), dpi=300, bbox_inches='tight')
     print(f"\nPlot successfully saved as: {os.path.join(output_dir, output_filename)}")
 
