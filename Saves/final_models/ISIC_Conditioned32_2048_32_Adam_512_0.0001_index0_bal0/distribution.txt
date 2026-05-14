@@ -1,0 +1,9 @@
+--- Fitzpatrick Skin Type Distribution ---
+Null/Unclassified (0): 0
+Type I (1):            516
+Type II (2):           819
+Type III (3):          291
+Type IV (4):           161
+Type V (5):            142
+Type VI (6):           119
+Total Images:          2048
